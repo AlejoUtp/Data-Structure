@@ -58,7 +58,7 @@ Implement a function that merges two sorted Vector<int> into one sorted vector (
 Vector<int> mergeSorted(const Vector<int>& a, const Vector<int>& b);
 ```
 
-## Vectors in the context of linear algebra
+    ## Vectors in the context of 'linear algebra'
 
 ### 1. LAVector class
 Write the `LAVector` class that represents a vector in the context of linear
