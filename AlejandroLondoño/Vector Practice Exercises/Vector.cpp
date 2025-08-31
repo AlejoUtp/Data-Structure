@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <cmath>
 
 using namespace std;
 
@@ -44,6 +45,31 @@ public:
       storage[i] = other.storage[i];
     }
   }
+
+  // Constructor por lista de inicialización
+  Vector(std::initializer_list<T> init) {
+    capacity = (init.size() > 0 ? static_cast<unsigned int>(init.size()) : 5);
+    storage = new T[capacity];
+    sz = 0;
+    policy = 1.5;
+    for (const auto &val : init) {
+      storage[sz++] = val;
+    }
+  }
+
+// --- Operador de asignación ---------------------
+Vector<T>& operator=(const Vector<T>& other) {
+    if (this != &other) {
+        delete[] storage;
+        sz = other.sz;
+        capacity = other.capacity;                            //Para LAVector
+        storage = new T[capacity];
+        for (unsigned int i = 0; i < sz; i++) {
+            storage[i] = other.storage[i];
+        }
+    }
+    return *this;
+}
   
  //Destructor
   ~Vector() { delete[] storage; }
@@ -89,21 +115,29 @@ public:
   }
 // --- Acceso por índice ---------------------------------------
 
-  const T &operator[](unsigned int index) const { return storage[index]; }
+// Permite modificar el elemento
+T& operator[](unsigned int index) { 
+    return storage[index]; 
+}
 
-  T &at(unsigned int index) {
+// Solo lectura cuando el Vector es const
+const T& operator[](unsigned int index) const { 
+    return storage[index]; 
+}
+
+T& at(unsigned int index) {
     if (index >= sz) {
       throw out_of_range("Index out of range");
     }
     return storage[index];
-  }
+}
 
-  const T &at(unsigned int index) const {
+const T& at(unsigned int index) const {
     if (index >= sz) {
       throw out_of_range("Index out of range");
     }
     return storage[index];
-  }
+}
 
 
 private:
@@ -132,83 +166,183 @@ private:
 
 // ----------------Vector Practice Exercises------------------------------------------------------------------------------------------------------------------------------------------
 
-// 1. **Sum of Elements**
-// Write a function that takes a `Vector<int>` and returns the sum of all elements. 
-
-int sumVector(const Vector<int>& v){
-    int sum = 0;
-    for(unsigned int i = 0; i< v.size(); i++){
-        sum += v[i];
+// Suma los elementos de un Vector<int>
+int sumVector(const Vector<int>& v) {
+    int sum = 0; // Inicializa la suma en 0
+    for (unsigned int i = 0; i < v.size(); i++) { // Recorre todos los elementos del vector
+        sum += v[i]; // Suma cada elemento al acumulador
     }
-    return sum;
+    return sum; // Devuelve la suma total
 }
 
-void printVector(const Vector<int>& v){
-    for(unsigned int i = 0; i< v.size(); i++){
-        cout << v[i] << " ";
+// Imprime los elementos de un Vector<int>
+void printVector(const Vector<int>& v) {
+    for (unsigned int i = 0; i < v.size(); i++) { // Recorre todos los elementos del vector
+        cout << v[i] << " "; // Imprime cada elemento seguido de un espacio
     }
-    cout << endl;
+    cout << endl; // Salto de línea al final
 }
 
-//### 2. Reverse a Vector
-//Write a function that takes a Vector<int> and returns a new Vector<int> with elements in reverse order.
+// Invierte los elementos de un Vector<int> y devuelve un nuevo Vector<int>
+Vector<int> reverseVector(const Vector<int>& v) {
+    Vector<int> reversed; // Crea un nuevo vector para almacenar los elementos invertidos
+    for (unsigned int i = v.size(); i-- > 0; ) { // Recorre el vector desde el último elemento al primero
+        reversed.push_back(v[i]); // Agrega cada elemento al nuevo vector
+    }
+    return reversed; // Devuelve el vector invertido
+}
 
-//Vector<int>: es el tipo de valor que la función devuelve, es decir, retorna un vector de enteros.
+// Filtra los números pares de un Vector<int> y devuelve un nuevo Vector<int>
+Vector<int> filterEven(const Vector<int>& v) {
+    Vector<int> evens; // Crea un nuevo vector para almacenar los números pares
+    for (unsigned int i = 0; i < v.size(); i++) { // Recorre todos los elementos del vector
+        if (v[i] % 2 == 0) { // Verifica si el elemento es par
+            evens.push_back(v[i]); // Si es par, lo agrega al nuevo vector
+        }
+    }
+    return evens; // Devuelve el vector con los números pares
+}
 
-Vector<int> reverseVector(const Vector<int>& v){ // "(const Vector<int>& v)" : es el parámetro de entrada: una referencia constante a un Vector<int> (para no hacer copia y no modificar el original).
-  Vector<int> reversed;
-  for(int i = v.size() - 1; i >= 0; i--){ //En bucles hacia atrás: se usa (int i = v.size() - 1; i >= 0; i--) ya que va de 0 a v.size() - 1.
-    reversed.push_back(v[i]);
+// Prueba de crecimiento dinámico del Vector<int>
+void DynamicGrowthTest() {
+    Vector<int> u; // Crea un vector vacío
+    int lastCapacity = u.getCapacity(); // Obtiene la capacidad inicial del vector
+    for (unsigned int i = 0; i < 1000; i++) { // Inserta 1000 elementos en el vector
+        u.push_back(i); // Agrega el elemento al final del vector
+        if (lastCapacity != u.getCapacity()) { // Verifica si la capacidad ha cambiado
+            lastCapacity = u.getCapacity(); // Actualiza la capacidad
+            cout << "Size: " << u.size() << ", Capacity: " << u.getCapacity() << endl; // Imprime el tamaño y la capacidad
+        }
+    }
+}
+
+// Fusiona dos vectores ordenados en uno solo, también ordenado
+Vector<int> mergeSorted(const Vector<int>& a, const Vector<int>& b) {
+    Vector<int> sorted; // Crea un nuevo vector para almacenar los elementos fusionados
+    unsigned int i = 0, j = 0; // Inicializa los índices para recorrer ambos vectores
+    while (i < a.size() && j < b.size()) { // Mientras haya elementos en ambos vectores
+        if (a[i] <= b[j]) { // Si el elemento en 'a' es menor o igual al de 'b'
+            sorted.push_back(a[i]); // Agrega el elemento de 'a' al nuevo vector
+            i++; // Avanza al siguiente elemento en 'a'
+        } else { // Si el elemento en 'b' es menor
+            sorted.push_back(b[j]); // Agrega el elemento de 'b' al nuevo vector
+            j++; // Avanza al siguiente elemento en 'b'
+        }
+    }
+    while (i < a.size()) { // Si quedan elementos en 'a'
+        sorted.push_back(a[i]); // Agrega los elementos restantes de 'a'
+        i++;
+    }
+    while (j < b.size()) { // Si quedan elementos en 'b'
+        sorted.push_back(b[j]); // Agrega los elementos restantes de 'b'
+        j++;
+    }
+    return sorted; // Devuelve el vector fusionado y ordenado
   }
-  return reversed;
-}
 
-//### 3. **Filter Even Numbers**
-//Write a function that takes a `Vector<int>` and returns a new vector containing only the even numbers.
+//! EXCERSICES WITH VECTORS IN THE CONTEXT OF 'LINEAR ALGEBRA' --------------------------------------------------------------------------
 
-Vector<int> filterEven(const Vector<int>& v){
-  Vector<int> evens;
-  for(int i = 0; i < v.size(); i++){
-    if(v[i] % 2 == 0){
-      evens.push_back(v[i]);
+/* ##Vectors in the context of 'linear algebra'
+
+### 1. LAVector class
+Write the `LAVector` class that represents a vector in the context of linear
+algebra (not a a data structure that stores elements):
+- Implement a constructor, a copy constructor an a destructor if needed.
+- Implement `operator+` for vector addition
+- Implement `operator-` for vector subtraction  
+- Implement `operator*` for scalar multiplication
+- Add a `dot_product()` method to compute the dot product between two vectors
+- Add a `magnitude()` method to calculate the Euclidean norm
+- **Challenge**: Implement vector normalization
+*/ 
+
+class LAVector {
+private:
+    Vector<double> coords;  // aquí usas tu vector propio
+public:
+    // Constructor que recibe el tamaño del vector
+    LAVector(unsigned int n) {
+    for (unsigned int i = 0; i < n; i++) {
+        coords.push_back(0.0);    // Inicializa con ceros
     }
-  }
-  return evens;
-}
+} 
 
-/*### 4. Dynamic Growth Test
-
-Write a program that:
-
-Creates an empty `Vector<int> u;`
-
-Inserts numbers from 1 up to 1000 using `push_back`.
-
-Every time the capacity changes, print the size and capacity.
-
-Example Output (truncated):
-```
-Size: 6, Capacity: 7
-Size: 8, Capacity: 10
-Size: 11, Capacity: 15
-*/
-
-void DynamicGrowthTest(){
-  Vector<int> u;
-  int lastCapacity = u.getCapacity();
-  for(int i = 0; i < 1000; i++){
-    u.push_back(i);
-    if(lastCapacity != u.getCapacity()){
-       lastCapacity = u.getCapacity();
-      cout << "Size: " << u.size() << ", Capacity: " << u.getCapacity() << endl;
+    // Constructor a partir de un inicializador
+    LAVector(const std::initializer_list<double>& values) {
+        for (auto v : values) {
+            coords.push_back(v);
+        }
     }
-  }
-}
 
-//### 5. Merge Two Sorted Vectors
-//Implement a function that merges two sorted Vector<int> into one sorted vector (like the merge step of MergeSort).
+    // Suma de vectores 
+    LAVector operator+(const LAVector& other) const {       //aunque solo reciba un vector, puede sumar dos vectores ya que es 
+      LAVector result(coords.size());                       //como si coords[i] fuera a y other.coords[i] fuera b en c = a + b
+        for (unsigned int i = 0; i < coords.size(); i++) {  // equivalente a result.coords[i] = a.coords[i] + b.coords[i];
+            result.coords[i] = coords[i] + other.coords[i];
+        }
+        return result;
+    }
 
-Vector<int> mergeSorted(const Vector<int>& a, const Vector<int>& b);
+    // Resta de vectores
+    LAVector operator-(const LAVector& other) const {
+        LAVector result(coords.size());
+        for (unsigned int i = 0; i < coords.size(); i++) {
+            result.coords[i] = coords[i] - other.coords[i];
+        }
+        return result;
+    }
+
+    // Multiplicación por escalar
+    LAVector operator*(double scalar) const {
+        LAVector result(coords.size());
+        for (unsigned int i = 0; i < coords.size(); i++) {
+            result.coords[i] = coords[i] * scalar;
+        }
+        return result;
+    }
+
+    // Producto punto
+    double dot_product(const LAVector& other) const {
+        double sum = 0.0;
+        for (unsigned int i = 0; i < coords.size(); i++) {
+            sum += coords[i] * other.coords[i];
+        }
+        return sum;
+    }
+
+    // Magnitud (norma Euclídea)
+    double magnitude() const {
+        double sum = 0.0;
+        for (unsigned int i = 0; i < coords.size(); i++) {
+            sum += coords[i] * coords[i];
+        }
+        return sqrt(sum);
+    }
+
+    // Normalización
+    LAVector normalize() const {
+        double mag = magnitude();
+        LAVector result(coords.size());
+        for (unsigned int i = 0; i < coords.size(); i++) {
+            result.coords[i] = coords[i] / mag;
+        }
+        return result;
+    }
+
+    void PrintLAVector() const {
+      cout << "(";
+      for(unsigned int i = 0; i < coords.size(); i++){
+        cout << coords[i];
+        if(i < coords.size() - 1){
+          cout << ", ";
+        }
+      }
+      cout << ")" << endl;
+    }
+};
+
+//?Test Case: Create two 3D vectors representing points in space and perform all operations.
+
 
 int main() {
     int op = 0;
@@ -217,17 +351,31 @@ int main() {
         v.push_back(i);  // Vector: 1 2 3 4 5
     }
     
-    Vector<int> u;
+    Vector<int> u = {1, 3, 4, 7, 11}; 
+    Vector<int> s = {2, 6, 8, 9, 10};
 
     Vector<int> evens;
     Vector<int> reversed;
+    Vector<int> merged;
     
-    while (op != 4) {
+    LAVector a = {1.0, 2.0, 3.0};
+    LAVector b = {2.0, 5.0, 3.0};
+    
+    LAVector sum(3);
+    LAVector diff(3);
+    LAVector scaled(3);
+    LAVector normA(3);
+    double dot;
+    double magA;
+
+    while (op != 8) {
         cout << "\nIngrese una opción:\n";
         cout << "1. Sumar los elementos de un vector\n";
         cout << "2. Invertir un vector\n";
         cout << "3. Filtrar números pares de un vector\n";
-        cout << "4. Salir\n";
+        cout << "4. Prueba de crecimiento dinámico\n";
+        cout << "5. Merge de dos vectores ordenados\n";
+        cout << "6. Operaciones con LAVector (suma, resta, escalar, producto punto, magnitud, normalización)\n";
         cout << "Opción: ";
         cin >> op;
 
@@ -250,7 +398,7 @@ int main() {
         case 3: {
             cout << "Vector original: ";
             printVector(v);
-            Vector<int> evens = filterEven(v);  // Asegúrate de definir esta función
+            Vector<int> evens = filterEven(v);  
             cout << "Números pares en el vector: ";
             printVector(evens);
             break;
@@ -261,7 +409,44 @@ int main() {
             break;
 
         case 5:
-            cout << "Saliendo del programa..." << endl;
+            merged = mergeSorted(u, s); 
+            cout << "Vector 1: ";
+            printVector(u);
+            cout << "Vector 2: ";
+            printVector(s);
+            cout << "Vector mergeado: ";
+            printVector(merged);
+            break;
+
+        case 6:
+            cout << "Vector a: ";
+            a.PrintLAVector();
+            cout << "Vector b: ";
+            b.PrintLAVector();
+            sum = a + b;
+            diff = a - b;
+            scaled = a * 2.0;
+            dot = a.dot_product(b);
+            magA = a.magnitude();
+            normA = a.normalize();
+            cout << "Vector a + b = ";
+            sum.PrintLAVector();
+            cout << "Vector a - b = ";
+            diff.PrintLAVector();
+            cout << "Vector a * 2.0 = ";
+            scaled.PrintLAVector();
+            cout << "Dot product a . b = " << dot << endl;
+            cout << "Magnitude of a = " << magA << endl;
+            cout << "Normalized a = ";
+            normA.PrintLAVector();
+            break;
+
+        case 7: 
+              
+            break;
+
+        case 8:
+            
             break;
 
         default:
@@ -269,6 +454,5 @@ int main() {
             break;
         }
     }
-
     return 0;
-}
+  }
