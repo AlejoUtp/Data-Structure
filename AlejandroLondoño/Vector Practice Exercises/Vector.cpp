@@ -261,7 +261,7 @@ private:
     Vector<double> coords;  // aquí usas tu vector propio
 public:
     // Constructor que recibe el tamaño del vector
-    LAVector(unsigned int n) {
+    LAVector(unsigned int n) {      //Ejemplo de uso: LAVector result(coords.size());  
     for (unsigned int i = 0; i < n; i++) {
         coords.push_back(0.0);    // Inicializa con ceros
     }
