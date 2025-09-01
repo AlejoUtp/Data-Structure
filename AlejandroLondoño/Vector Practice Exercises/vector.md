@@ -82,12 +82,12 @@ Create a `Matrix` class that uses your `LAVector` class internally to store rows
 
 **Test Case**: Rotate a set of 2D points by 45 degrees using matrix multiplication.
 
-### Exercise 3: Neural Network Layer Implementation
-Use your Vector class to implement a simple neural network layer:
-- Create a `NeuralLayer` class that stores weights as a Vector of Vectors
-- Implement forward propagation: output = activation(weights * input + bias)
-- Use the sigmoid activation function: σ(x) = 1/(1 + e^(-x))
-- **Challenge**: Implement ReLU activation as an alternative
+    ### Exercise 3: Neural Network Layer Implementation
+    Use your Vector class to implement a simple neural network layer:
+    - Create a `NeuralLayer` class that stores weights as a Vector of Vectors
+    - Implement forward propagation: output = activation(weights * input + bias)
+    - Use the sigmoid activation function: σ(x) = 1/(1 + e^(-x))
+    - **Challenge**: Implement ReLU activation as an alternative
 
 **Test Case**: Create a layer with 3 inputs, 2 outputs, and process a sample input vector.
 
