@@ -339,10 +339,10 @@ public:
 
     // Suma de vectores
     LAVector operator+(const LAVector &other) const
-    {                                   // aunque solo reciba un vector, puede sumar dos vectores ya que es
-        LAVector result(coords.size()); // como si coords[i] fuera a y other.coords[i] fuera b en c = a + b
-        for (unsigned int i = 0; i < coords.size(); i++)
-        { // equivalente a result.coords[i] = a.coords[i] + b.coords[i];
+    {                                                    // aunque solo reciba un vector, puede sumar dos vectores ya que es
+        LAVector result(coords.size());                  // como si coords[i] fuera a y other.coords[i] fuera b en c = a + b
+        for (unsigned int i = 0; i < coords.size(); i++) // equivalente a result.coords[i] = a.coords[i] + b.coords[i];
+        {
             result.coords[i] = coords[i] + other.coords[i];
         }
         return result;
@@ -564,6 +564,73 @@ Use your Vector class to implement a simple neural network layer:
 - **Challenge**: Implement ReLU activation as an alternative
 */
 
+class NeuralLayer
+{
+private:
+    Matrix weights;    // Matriz de pesos (rows = neuronas, cols = entradas)
+    LAVector bias;     // Vector de sesgo
+    string activation; // Tipo de activación: "sigmoid" o "relu"
+
+    // Activación sigmoide
+    double sigmoid(double x) const
+    {
+        return 1.0 / (1.0 + exp(-x));
+    }
+
+    // Derivada de la sigmoide (útil para backpropagation, pero opcional por ahora)
+    double sigmoid_derivative(double x) const
+    {
+        double sig = sigmoid(x);
+        return sig * (1.0 - sig);
+    }
+
+    // Activación ReLU
+    double relu(double x) const
+    {
+        return max(0.0, x);
+    }
+
+public:
+    // Constructor
+    NeuralLayer(unsigned int inputSize, unsigned int outputSize, string act = "sigmoid")
+        : weights(outputSize, inputSize), bias(outputSize), activation(act) {}
+
+    // Propagación hacia adelante
+    LAVector forward(const LAVector &input) const
+    {
+        LAVector output = weights * input; // producto matriz-vector
+
+        // Añadir bias
+        for (unsigned int i = 0; i < output.size(); i++)
+        {
+            output[i] += bias[i];
+        }
+
+        // Aplicar activación
+        for (unsigned int i = 0; i < output.size(); i++)
+        {
+            if (activation == "sigmoid")
+                output[i] = sigmoid(output[i]);
+            else if (activation == "relu")
+                output[i] = relu(output[i]);
+        }
+
+        return output;
+    }
+
+    void printWeights() const
+    {
+        cout << "Pesos:\n";
+        weights.printMatrix();
+    }
+
+    void printBias() const
+    {
+        cout << "Bias: ";
+        bias.PrintLAVector();
+    }
+};
+
 int main()
 {
     int op = 0;
@@ -590,7 +657,7 @@ int main()
     double dot;
     double magA;
 
-    while (op != 8)
+    while (op != 11)
     {
         cout << "\nIngrese una opción:\n";
         cout << "1. Sumar los elementos de un vector\n";
@@ -601,6 +668,9 @@ int main()
         cout << "6. Operaciones con LAVector (suma, resta, escalar, producto punto, magnitud, normalización)\n";
         cout << "7. Rotación de puntos 2D en cualquier grado usando Matrix y LAVector\n";
         cout << "8. Rotación de un conjunto de puntos 2D por 45°\n";
+        cout << "9. Prueba de una capa de red neuronal\n";
+        cout << "10. Test Case: Capa neuronal con 3 entradas y 2 salidas\n";
+        cout << "11. Salir\n";
         cout << "Opción: ";
         cin >> op;
 
@@ -717,7 +787,48 @@ int main()
         }
 
         case 9:
+        {
+            cout << "Prueba de una capa de red neuronal" << endl;
 
+            // Capa: 3 entradas → 2 neuronas de salida con activación Sigmoid
+            NeuralLayer layer(3, 2, "sigmoid");
+
+            // Entrada de prueba
+            LAVector input = {1.0, 2.0, -1.0};
+
+            // Salida de la capa
+            LAVector output = layer.forward(input);
+
+            cout << "Entrada: ";
+            input.PrintLAVector();
+            cout << "Salida (sigmoid): ";
+            output.PrintLAVector();
+
+            break;
+        }
+
+        case 10:
+        {
+            cout << "--- Test Case: Capa neuronal con 3 entradas y 2 salidas ---\n";
+
+            // Paso 1: Crear la capa
+            NeuralLayer layer(3, 2, "sigmoid"); // 3 entradas, 2 salidas, activación sigmoid
+
+            // Paso 2: Crear vector de entrada
+            LAVector input = {0.5, -1.2, 2.0};
+
+            // Paso 3: Procesar la entrada
+            LAVector output = layer.forward(input);
+
+            // Paso 4: Mostrar resultados
+            cout << "Vector de entrada: ";
+            input.PrintLAVector();
+
+            cout << "Vector de salida (activación sigmoid): ";
+            output.PrintLAVector();
+
+            break;
+        }
         default:
             cout << "Opción no válida. Intente de nuevo." << endl;
             break;
