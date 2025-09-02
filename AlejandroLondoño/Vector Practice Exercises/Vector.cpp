@@ -319,6 +319,7 @@ public:
         sz = 0;
         storage = nullptr;
     }
+
     // Constructor que recibe el tamaño del vector
     LAVector(unsigned int n)
     { // Ejemplo de uso: LAVector result(coords.size());
@@ -396,6 +397,8 @@ public:
     LAVector normalize() const
     {
         double mag = magnitude();
+        if (mag == 0)
+            throw runtime_error("No se puede normalizar un vector de magnitud cero.");
         LAVector result(coords.size());
         for (unsigned int i = 0; i < coords.size(); i++)
         {
@@ -564,24 +567,19 @@ Use your Vector class to implement a simple neural network layer:
 - **Challenge**: Implement ReLU activation as an alternative
 */
 
+//**Test Case**: Create a layer with 3 inputs, 2 outputs, and process a sample input vector. ---> (option 9 in the menu)
+
 class NeuralLayer
 {
 private:
     Matrix weights;    // Matriz de pesos (rows = neuronas, cols = entradas)
-    LAVector bias;     // Vector de sesgo
+    LAVector bias;     // Vector de bias
     string activation; // Tipo de activación: "sigmoid" o "relu"
 
     // Activación sigmoide
     double sigmoid(double x) const
     {
         return 1.0 / (1.0 + exp(-x));
-    }
-
-    // Derivada de la sigmoide (útil para backpropagation, pero opcional por ahora)
-    double sigmoid_derivative(double x) const
-    {
-        double sig = sigmoid(x);
-        return sig * (1.0 - sig);
     }
 
     // Activación ReLU
@@ -592,8 +590,19 @@ private:
 
 public:
     // Constructor
-    NeuralLayer(unsigned int inputSize, unsigned int outputSize, string act = "sigmoid")
-        : weights(outputSize, inputSize), bias(outputSize), activation(act) {}
+    NeuralLayer(unsigned int inputSize, unsigned int outputSize, string act)
+    : weights(outputSize, inputSize), bias(outputSize), activation(act) 
+{
+    srand(time(0)); // semilla aleatoria, una vez por programa
+    for (unsigned int i = 0; i < outputSize; i++) {
+        for (unsigned int j = 0; j < inputSize; j++) {
+            // peso entre -1 y 1
+            weights[i][j] = ((double)rand() / RAND_MAX) * 2 - 1;
+        }
+        // bias también entre -1 y 1
+        bias[i] = ((double)rand() / RAND_MAX) * 2 - 1;
+    }
+}
 
     // Propagación hacia adelante
     LAVector forward(const LAVector &input) const
@@ -633,6 +642,7 @@ public:
 
 int main()
 {
+
     int op = 0;
     Vector<int> v;
     for (int i = 1; i <= 5; i++)
@@ -788,51 +798,40 @@ int main()
 
         case 9:
         {
-            cout << "Prueba de una capa de red neuronal" << endl;
-
-            // Capa: 3 entradas → 2 neuronas de salida con activación Sigmoid
-            NeuralLayer layer(3, 2, "sigmoid");
-
-            // Entrada de prueba
-            LAVector input = {1.0, 2.0, -1.0};
-
-            // Salida de la capa
-            LAVector output = layer.forward(input);
-
-            cout << "Entrada: ";
-            input.PrintLAVector();
-            cout << "Salida (sigmoid): ";
-            output.PrintLAVector();
-
-            break;
-        }
-
-        case 10:
-        {
             cout << "--- Test Case: Capa neuronal con 3 entradas y 2 salidas ---\n";
 
             // Paso 1: Crear la capa
-            NeuralLayer layer(3, 2, "sigmoid"); // 3 entradas, 2 salidas, activación sigmoid
+            NeuralLayer layerS(3, 2, "sigmoid"); // 3 entradas, 2 salidas, activación sigmoid
+            NeuralLayer layerR(3, 2, "relu"); // 3 entradas, 2 salidas, activación sigmoid
+            
+            cout << "Pesos y Bias iniciales (aleatorios):\n";
+            layerS.printWeights();
+            layerS.printBias();
+            cout << endl;
+            
 
             // Paso 2: Crear vector de entrada
-            LAVector input = {0.5, -1.2, 2.0};
+            LAVector input = {2, 1.8, 3.0}; // Vector de entrada de tamaño 3
 
             // Paso 3: Procesar la entrada
-            LAVector output = layer.forward(input);
-
+            LAVector output = layerS.forward(input);
+            LAVector outputR = layerR.forward(input);
             // Paso 4: Mostrar resultados
             cout << "Vector de entrada: ";
             input.PrintLAVector();
 
             cout << "Vector de salida (activación sigmoid): ";
             output.PrintLAVector();
-
+            cout << "Vector de salida (activación ReLU): ";
+            outputR.PrintLAVector();
             break;
         }
+
+        
         default:
             cout << "Opción no válida. Intente de nuevo." << endl;
             break;
         }
     }
-    return 0;
+    return 0; 
 }
