@@ -667,7 +667,7 @@ int main()
     double dot;
     double magA;
 
-    while (op != 11)
+    while (op != 10)
     {
         cout << "\nIngrese una opción:\n";
         cout << "1. Sumar los elementos de un vector\n";
@@ -678,10 +678,9 @@ int main()
         cout << "6. Operaciones con LAVector (suma, resta, escalar, producto punto, magnitud, normalización)\n";
         cout << "7. Rotación de puntos 2D en cualquier grado usando Matrix y LAVector\n";
         cout << "8. Rotación de un conjunto de puntos 2D por 45°\n";
-        cout << "9. Prueba de una capa de red neuronal\n";
-        cout << "10. Test Case: Capa neuronal con 3 entradas y 2 salidas\n";
-        cout << "11. Salir\n";
-        cout << "Opción: ";
+        cout << "9. Test Case: Capa neuronal con 3 entradas y 2 salidas\n";
+        cout << "10. Salir\n";
+        cout << "Opción : ";
         cin >> op;
 
         switch (op)
@@ -827,6 +826,11 @@ int main()
             break;
         }
 
+        case 10:
+        {
+            cout << "Saliendo del programa." << endl;
+            break;
+        }
         
         default:
             cout << "Opción no válida. Intente de nuevo." << endl;
